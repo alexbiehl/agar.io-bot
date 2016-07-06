@@ -1,5 +1,6 @@
 import           Conduit
 import           Control.Arrow
+import           Control.Monad.State.Strict
 import           System.Random
 
 type BotId      = Int
@@ -28,8 +29,6 @@ data Bot = Bot { runBot :: Input -> (Output, Bot) }
 -- .. .. .. .. .. .. .. ..
 -- .. .. .. .. (1000, 1000)
 
-
-
 -- | Given a random generator, generates a BlobAction
 randomBlobAction :: RandomGen g => g -> (BlobAction, g)
 randomBlobAction g =
@@ -51,8 +50,12 @@ newRandomBot _bid = do
   return $ Bot (go rnd0)
   where
     go rnd (_ownBlobs, _otherBlobs, _foods, _toxins) =
-      let (action, rnd') = randomBlobAction rnd
-          out = (action, (1.0, 1.0))
+      let
+        (out, rnd') = runState (do action <- state randomBlobAction
+                                   x_pos  <- state (randomR (0.0, 1000.0))
+                                   y_pos  <- state (randomR (0.0, 1000.0))
+                                   return (action, (x_pos, y_pos))
+                               ) rnd
       in (out, Bot (go rnd'))
 
 main :: IO ()
