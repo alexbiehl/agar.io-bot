@@ -18,6 +18,13 @@ type Input      = (OwnBlobs, OtherBlobs, [Food], [Toxin])
 data BlobAction = None | Throw | Split
                 deriving (Eq, Show, Enum, Bounded)
 
+-- | Generate random samples of 'BlobActions'
+instance Random BlobAction where
+  randomR (lo, hi) =
+    first toEnum . randomR (fromEnum lo, fromEnum hi)
+  random =
+    randomR (minBound, maxBound)
+
 type Output     = (BlobAction, Position)
 
 -- | A 'Bot' is a mealy automaton carrying its internal state.
@@ -29,19 +36,6 @@ data Bot = Bot { runBot :: Input -> (Output, Bot) }
 -- .. .. .. .. .. .. .. ..
 -- .. .. .. .. (1000, 1000)
 
--- | Given a random generator, generates a BlobAction
-randomBlobAction :: RandomGen g => g -> (BlobAction, g)
-randomBlobAction g =
-  first toEnum
-  $ randomR (fromEnum minAction, fromEnum maxAction)
-  $ g
-  where
-    minAction :: BlobAction
-    minAction = minBound
-
-    maxAction :: BlobAction
-    maxAction = maxBound
-
 -- | Creates a new random bot doing random actions and
 -- going to random places.
 newRandomBot :: BotId -> IO Bot
@@ -52,7 +46,7 @@ newRandomBot _bid = do
     go :: StdGen -> Input -> (Output, Bot)
     go rnd (_ownBlobs, _otherBlobs, _foods, _toxins) =
       let
-        (out, rnd') = runState (do action <- state randomBlobAction
+        (out, rnd') = runState (do action <- state random
                                    x_pos  <- state (randomR (0.0, 1000.0))
                                    y_pos  <- state (randomR (0.0, 1000.0))
                                    return (action, (x_pos, y_pos))
