@@ -49,6 +49,7 @@ newRandomBot _bid = do
   rnd0 <- newStdGen
   return $ Bot (go rnd0)
   where
+    go :: StdGen -> Input -> (Output, Bot)
     go rnd (_ownBlobs, _otherBlobs, _foods, _toxins) =
       let
         (out, rnd') = runState (do action <- state randomBlobAction
