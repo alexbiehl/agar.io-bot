@@ -22,6 +22,14 @@ type Output     = (BlobAction, Position)
 -- | A 'Bot' is a mealy automaton carrying its internal state.
 data Bot = Bot { runBot :: Input -> (Output, Bot) }
 
+-- Dimensions:
+-- (0,0) .. .. .. .. .. ..
+-- .. .. .. .. .. .. .. ..
+-- .. .. .. .. .. .. .. ..
+-- .. .. .. .. (1000, 1000)
+
+
+
 -- | Given a random generator, generates a BlobAction
 randomBlobAction :: RandomGen g => g -> (BlobAction, g)
 randomBlobAction g =
