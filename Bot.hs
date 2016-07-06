@@ -70,7 +70,7 @@ main = do
                 Nothing -> return ()
 
     inputC :: Conduit String IO Input
-    inputC = awaitForever (yield . (read :: String -> Input))
+    inputC = awaitForever (yield . read)
 
     outputC :: Conduit Output IO String
     outputC = awaitForever (yield . show)
